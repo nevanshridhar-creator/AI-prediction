@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WC2026 Prediction Market — auto-updated daily</title>
+<style>
+:root{--bg:#0e1117;--card:#161b24;--card2:#1c2330;--ink:#e8eaf0;--mut:#8b93a5;--dim:#5c6475;--line:#262e3d;--green:#27c08d;--greenbg:#13332a;--red:#e25555;--gold:#e3b341;--goldbg:#332b13}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45}
+.wrap{max-width:880px;margin:0 auto;padding:24px 16px 60px}
+.hdr{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+.hdr h1{font-size:20px;font-weight:600}
+.upd{font-size:11px;color:var(--dim);margin-bottom:16px}
+.badge{font-size:10px;padding:4px 9px;border-radius:6px;background:var(--greenbg);color:var(--green);font-weight:600}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:16px;overflow-x:auto}
+.tab{font-size:13px;padding:8px 14px;color:var(--mut);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;white-space:nowrap;font-family:inherit}
+.tab.on{color:var(--ink);border-bottom-color:var(--gold);font-weight:600}
+.panel{display:none}.panel.on{display:block}
+.days{display:flex;gap:5px;overflow-x:auto;padding-bottom:8px;margin-bottom:14px}
+.day{font-size:12px;padding:6px 12px;border-radius:7px;background:var(--card);border:1px solid var(--line);color:var(--mut);cursor:pointer;white-space:nowrap;font-family:inherit}
+.day.on{background:var(--card2);color:var(--ink);border-color:var(--gold);font-weight:600}
+.mkt{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.mkt-meta{font-size:10.5px;color:var(--dim);display:flex;gap:8px;margin-bottom:8px;justify-content:space-between}
+.mkt-q{font-size:15px;font-weight:600;margin-bottom:11px}
+.prices{display:flex;gap:7px;margin-bottom:9px}
+.price{flex:1;border:1px solid var(--line);border-radius:9px;padding:9px 6px;text-align:center;background:var(--card2)}
+.price.lead{background:var(--greenbg);border-color:var(--green)}
+.price .lbl{font-size:10.5px;color:var(--mut);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.price .cents{font-size:19px;font-weight:700}
+.price.lead .cents{color:var(--green)}
+.price .odds{font-size:10px;color:var(--dim);margin-top:1px}
+.more-btn{width:100%;font-size:11px;padding:7px;background:var(--card2);border:1px solid var(--line);border-radius:8px;color:var(--mut);cursor:pointer;font-family:inherit}
+.xmkts{display:none;margin-top:10px;border-top:1px solid var(--line);padding-top:10px}
+.xmkts.on{display:block}
+.xrow{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:12.5px;border-bottom:1px dashed var(--line)}
+.xrow:last-of-type{border-bottom:none}
+.xlbl{color:var(--mut)}
+.xv{font-weight:700}
+.xv small{font-weight:400;color:var(--dim);margin-left:5px}
+.schips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.schip{font-size:11px;padding:4px 9px;border-radius:6px;background:var(--card2);border:1px solid var(--line);color:var(--ink)}
+.schip b{color:var(--gold)}
+.bb-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.bb-day{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.06em;margin-bottom:9px}
+.bb-row{display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.bb-row:last-child{border-bottom:none}
+.bb-type{font-size:9px;font-weight:700;letter-spacing:.05em;padding:3px 7px;border-radius:4px;flex-shrink:0;margin-top:2px}
+.bb-single{background:var(--greenbg);color:var(--green)}
+.bb-parlay{background:var(--goldbg);color:var(--gold)}
+.bb-safe{background:#1a2a3d;color:#5aa9e6}
+.bb-pick{flex:1}.bb-pick b{font-weight:600}
+.bb-sub{font-size:11px;color:var(--dim);margin-top:2px}
+.bb-odds{font-size:14px;font-weight:700;flex-shrink:0}
+select{width:100%;font-size:14px;padding:10px 12px;margin-bottom:14px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:9px;font-family:inherit}
+.form-strip{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.fchip{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:10px 12px;flex:1;min-width:90px;text-align:center}
+.fchip .v{font-size:17px;font-weight:700}.fchip .l{font-size:9.5px;color:var(--mut);margin-top:2px}
+table{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);border-radius:12px;overflow:hidden}
+th{text-align:left;font-size:10.5px;color:var(--mut);font-weight:600;padding:9px 10px;border-bottom:1px solid var(--line);background:var(--card2)}
+th.num,td.num{text-align:right}
+td{padding:9px 10px;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:none}
+.note{font-size:11px;color:var(--dim);margin-top:12px;line-height:1.5}
+.W{color:var(--green);font-weight:700;font-size:11px}.L{color:var(--red);font-weight:700;font-size:11px}.D{color:var(--mut);font-weight:700;font-size:11px}
+.foot{margin-top:30px;padding-top:14px;border-top:1px solid var(--line);font-size:11px;color:var(--dim);text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="hdr"><h1>&#9917; WC2026 Prediction Market</h1><span class="badge">AUTO-UPDATES DAILY</span></div>
+<div class="upd" id="upd"></div>
+<div class="tabs">
+  <button class="tab on" onclick="pTab('mkts',this)">Markets</button>
+  <button class="tab" onclick="pTab('bets',this)">Best bets per day</button>
+  <button class="tab" onclick="pTab('players',this)">Player stats (last 20)</button>
+</div>
+<div id="p-mkts" class="panel on"><div class="days" id="day-strip"></div><div id="mkt-list"></div></div>
+<div id="p-bets" class="panel"><div id="bb-list"></div>
+<p class="note">Fair odds = 100 &divide; model probability (no bookmaker margin). SAFE = double-chance/DNB legs. Corners, fouls, cards and player shots are not priced &mdash; that data only exists in paid feeds and we don't fabricate numbers.</p></div>
+<div id="p-players" class="panel"><select id="team-sel" onchange="renderTeam(this.value)"></select><div id="team-view"></div>
+<p class="note">Computed from real recorded goals over each team's last 20 internationals.</p></div>
+<div class="foot">Scratch-built ELO + Poisson goal model &middot; retrained daily on fresh results &middot; for analysis &amp; entertainment</div>
+</div>
+<script>
+const D=__DATA__;
+document.getElementById('upd').textContent='Model retrained: '+D.updated+' · '+D.n_train.toLocaleString()+' training matches · '+D.M.length+' open markets';
+const days=[...new Set(D.M.map(m=>m.d))];let curDay=days[0];
+function pTab(t,el){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));el.classList.add('on');document.querySelectorAll('.panel').forEach(x=>x.classList.remove('on'));document.getElementById('p-'+t).classList.add('on');}
+const odds=p=>p>0?(100/p).toFixed(2):'-';
+function renderDays(){document.getElementById('day-strip').innerHTML=days.map(d=>`<button class="day${d===curDay?' on':''}" onclick="setDay('${d}')">${monthDay(d)}</button>`).join('');}
+function monthDay(d){const[m,dd]=d.split('-');return['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m]+' '+ +dd;}
+function setDay(d){curDay=d;renderDays();renderMkts();}
+function renderMkts(){
+  document.getElementById('mkt-list').innerHTML=D.M.filter(m=>m.d===curDay).map((m,i)=>{
+    const mx=Math.max(m.pH,m.pD,m.pA);
+    return `<div class="mkt">
+    <div class="mkt-meta"><span>${m.city}</span><span>xG ${m.xg}</span></div>
+    <div class="mkt-q">${m.h} vs ${m.a}</div>
+    <div class="prices">
+      <div class="price${m.pH===mx?' lead':''}"><div class="lbl">${m.h}</div><div class="cents">${m.pH}&cent;</div><div class="odds">${odds(m.pH)}x</div></div>
+      <div class="price${m.pD===mx?' lead':''}"><div class="lbl">Draw</div><div class="cents">${m.pD}&cent;</div><div class="odds">${odds(m.pD)}x</div></div>
+      <div class="price${m.pA===mx?' lead':''}"><div class="lbl">${m.a}</div><div class="cents">${m.pA}&cent;</div><div class="odds">${odds(m.pA)}x</div></div>
+    </div>
+    <button class="more-btn" onclick="this.nextElementSibling.classList.toggle('on');this.textContent=this.textContent.includes('More')?'Hide markets ▲':'More markets ▼'">More markets ▼</button>
+    <div class="xmkts">
+      <div class="xrow"><span class="xlbl">Double chance ${m.h} or Draw (1X)</span><span class="xv">${m.dc1X}&cent;<small>${odds(m.dc1X)}x</small></span></div>
+      <div class="xrow"><span class="xlbl">Double chance Draw or ${m.a} (X2)</span><span class="xv">${m.dcX2}&cent;<small>${odds(m.dcX2)}x</small></span></div>
+      <div class="xrow"><span class="xlbl">Double chance either team (12)</span><span class="xv">${m.dc12}&cent;<small>${odds(m.dc12)}x</small></span></div>
+      <div class="xrow"><span class="xlbl">Draw no bet — ${m.h}</span><span class="xv">${m.dnbH}&cent;<small>${odds(m.dnbH)}x</small></span></div>
+      <div class="xrow"><span class="xlbl">Draw no bet — ${m.a}</span><span class="xv">${m.dnbA}&cent;<small>${odds(m.dnbA)}x</small></span></div>
+      <div class="xrow"><span class="xlbl">Over 1.5 goals</span><span class="xv">${m.o15}&cent;<small>${odds(m.o15)}x</small></span></div>
+      <div class="xrow"><span class="xlbl">Over 2.5 goals</span><span class="xv">${m.o25}&cent;<small>${odds(m.o25)}x</small></span></div>
+      <div class="xrow"><span class="xlbl">Under 2.5 goals</span><span class="xv">${m.u25}&cent;<small>${odds(m.u25)}x</small></span></div>
+      <div class="xrow"><span class="xlbl">Both teams to score</span><span class="xv">${m.btts}&cent;<small>${odds(m.btts)}x</small></span></div>
+      <div class="xrow"><span class="xlbl">${m.h} win to nil</span><span class="xv">${m.wtnH}&cent;<small>${odds(m.wtnH)}x</small></span></div>
+      <div class="xrow"><span class="xlbl">${m.h} leading at half-time</span><span class="xv">${m.htH}&cent;<small>${odds(m.htH)}x</small></span></div>
+      ${m.scorers.length?`<div class="schips">${m.scorers.map(s=>`<span class="schip"><b>${s[2]}&cent;</b> ${s[0]} anytime <small style="color:var(--dim)">(${s[1]})</small></span>`).join('')}</div>`:''}
+    </div></div>`;}).join('');}
+function bestBets(){
+  let html='';
+  for(const d of days){
+    const list=D.M.filter(m=>m.d===d);
+    const cands=[];
+    for(const m of list){
+      const vs=m.h+' vs '+m.a;
+      cands.push(['1X2',m.h+' to win',m.pH,vs],['1X2',m.a+' to win',m.pA,vs],['1X2','Draw',m.pD,vs],
+        ['SAFE',m.h+' or draw (1X)',m.dc1X,vs],['SAFE','Draw or '+m.a+' (X2)',m.dcX2,vs],
+        ['SAFE',m.h+' DNB',m.dnbH,vs],['SAFE',m.a+' DNB',m.dnbA,vs],
+        ['GOALS','Over 1.5 goals',m.o15,vs],['GOALS','Over 2.5 goals',m.o25,vs],['GOALS','Under 2.5 goals',m.u25,vs],['GOALS','BTTS',m.btts,vs]);
+      for(const s of m.scorers) cands.push(['SCORER',s[0]+' anytime',s[2],vs]);
+    }
+    const singles=cands.filter(c=>c[0]==='1X2').sort((a,b)=>b[2]-a[2]);
+    const best=singles[0];
+    // parlay: best leg per match (any market), >=62, max 4 legs, distinct matches
+    const byMatch={};
+    for(const c of cands){const k=c[3];if(!byMatch[k]||c[2]>byMatch[k][2])byMatch[k]=c;}
+    let legs=Object.values(byMatch).filter(c=>c[2]>=62).sort((a,b)=>b[2]-a[2]).slice(0,4);
+    if(legs.length<2)legs=Object.values(byMatch).sort((a,b)=>b[2]-a[2]).slice(0,2);
+    const co=legs.reduce((a,l)=>a*(100/l[2]),1),cp=legs.reduce((a,l)=>a*(l[2]/100),1);
+    // safe builder: top double-chance/DNB legs
+    const safes=cands.filter(c=>c[0]==='SAFE').sort((a,b)=>b[2]-a[2]);
+    const sl=[];const seen=new Set();
+    for(const s of safes){if(!seen.has(s[3])&&s[2]>=75){sl.push(s);seen.add(s[3]);}if(sl.length===3)break;}
+    const sco=sl.reduce((a,l)=>a*(100/l[2]),1),scp=sl.reduce((a,l)=>a*(l[2]/100),1);
+    html+=`<div class="bb-card"><div class="bb-day">${monthDay(d).toUpperCase()} &middot; ${list.length} MATCH${list.length>1?'ES':''}</div>
+    <div class="bb-row"><span class="bb-type bb-single">SINGLE</span>
+      <div class="bb-pick"><b>${best[1]}</b><div class="bb-sub">${best[3]} &middot; ${best[2]}% model probability</div></div>
+      <span class="bb-odds">${odds(best[2])}x</span></div>
+    <div class="bb-row"><span class="bb-type bb-parlay">PARLAY</span>
+      <div class="bb-pick">${legs.map(l=>`<b>${l[1]}</b> <span style="color:var(--dim);font-size:10px">(${l[2]}&cent;)</span>`).join(' + ')}
+      <div class="bb-sub">${legs.length} legs across markets &middot; ${(cp*100).toFixed(0)}% combined</div></div>
+      <span class="bb-odds">${co.toFixed(2)}x</span></div>
+    ${sl.length>=2?`<div class="bb-row"><span class="bb-type bb-safe">SAFE</span>
+      <div class="bb-pick">${sl.map(l=>`<b>${l[1]}</b> <span style="color:var(--dim);font-size:10px">(${l[2]}&cent;)</span>`).join(' + ')}
+      <div class="bb-sub">double chance / DNB builder &middot; ${(scp*100).toFixed(0)}% combined</div></div>
+      <span class="bb-odds">${sco.toFixed(2)}x</span></div>`:''}
+    </div>`;}
+  document.getElementById('bb-list').innerHTML=html;}
+function renderTeamSel(){
+  const ts=Object.keys(D.F).sort();
+  document.getElementById('team-sel').innerHTML=ts.map((t,i)=>`<option${i===0?' selected':''}>${t}</option>`).join('');
+  if(ts.length)renderTeam(ts[0]);}
+function renderTeam(t){
+  const f=D.F[t];const ps=D.P[t]||[];
+  const fd=f[5].split('').map(c=>`<span class="${c}">${c}</span>`).join('');
+  document.getElementById('team-view').innerHTML=`
+  <div class="form-strip">
+    <div class="fchip"><div class="v">${f[0]}-${f[1]}-${f[2]}</div><div class="l">W-D-L (LAST 20)</div></div>
+    <div class="fchip"><div class="v">${f[3]}</div><div class="l">GOALS FOR</div></div>
+    <div class="fchip"><div class="v">${f[4]}</div><div class="l">GOALS AGAINST</div></div>
+    <div class="fchip"><div class="v">${(f[3]/20).toFixed(1)}</div><div class="l">GOALS / GAME</div></div>
+    <div class="fchip"><div class="v">${fd}</div><div class="l">LAST 10 FORM</div></div>
+  </div>
+  <table><thead><tr><th>Player</th><th class="num">Goals</th><th class="num">Pens</th><th class="num">G/game</th></tr></thead>
+  <tbody>${ps.map(p=>`<tr><td>${p[0]}</td><td class="num" style="font-weight:700">${p[1]}</td><td class="num">${p[2]}</td><td class="num">${p[3]}</td></tr>`).join('')}</tbody></table>`;}
+renderDays();renderMkts();bestBets();renderTeamSel();
+</script>
+</body>
+</html>
