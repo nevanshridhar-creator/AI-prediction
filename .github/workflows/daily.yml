@@ -1,0 +1,34 @@
+name: Daily rebuild
+
+on:
+  schedule:
+    - cron: "0 5 * * *"   # every day 05:00 UTC (~10:30 AM IST), before matchday kickoffs
+  workflow_dispatch:        # also lets you trigger manually from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Rebuild model and site
+        run: python build.py
+
+      - name: Commit and push updated site
+        run: |
+          git config user.name "wc2026-bot"
+          git config user.email "actions@github.com"
+          git add docs/
+          git diff --cached --quiet || git commit -m "Daily rebuild: $(date -u +%F)"
+          git push
+        
