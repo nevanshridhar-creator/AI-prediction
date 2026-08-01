@@ -82,7 +82,7 @@ tr:last-child td{border-bottom:none}
 <div class="foot">Scratch-built ELO + Poisson goal model &middot; retrained daily on fresh results &middot; for analysis &amp; entertainment</div>
 </div>
 <script>
-const D={"updated":"2026-07-31 07:52 UTC","n_train":27305,"M":[],"F":{},"P":{}};
+const D={"updated":"2026-08-01 07:29 UTC","n_train":27305,"M":[],"F":{},"P":{}};
 document.getElementById('upd').textContent='Model retrained: '+D.updated+' · '+D.n_train.toLocaleString()+' training matches · '+D.M.length+' open markets';
 const days=[...new Set(D.M.map(m=>m.d))];let curDay=days[0];
 function pTab(t,el){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));el.classList.add('on');document.querySelectorAll('.panel').forEach(x=>x.classList.remove('on'));document.getElementById('p-'+t).classList.add('on');}
